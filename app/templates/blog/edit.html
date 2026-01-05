@@ -66,6 +66,15 @@
 {% endblock %}
 {% block content %}
 <section class="card form-card">
+    <script>
+        window.addEventListener('beforeunload', function (e) {
+// 设置提示信息
+const confirmationMessage = '您确定要离开此页面吗？未保存的数据可能会丢失。';
+e.preventDefault(); // 阻止默认行为
+e.returnValue = confirmationMessage; // Gecko 和 IE 浏览器兼容
+return confirmationMessage; // Webkit 浏览器兼容
+});
+        </script>
     <header class="form-header">
         <h1>{{ '编辑文章' if post_id else '撰写文章' }}</h1>
         <p class="form-tip">正文支持 Markdown 语法，可直接粘贴图片链接或代码片段。</p>
