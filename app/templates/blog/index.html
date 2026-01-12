@@ -180,6 +180,9 @@
             display: flex;
             flex-direction: column;
             gap: 16px;
+            /* 修改：限制文章列表的最大宽度，防止在宽屏下过度拉伸 */
+            max-width: 900px; 
+            width: 100%;
         }
 
         .post-card {
@@ -215,9 +218,26 @@
             color: #be185d;
         }
 
+        /* 默认亮色模式下的 Class 标签 */
         .badge.class {
             background: rgba(14, 165, 233, 0.14);
             color: #0369a1;
+        }
+
+        /* 修改：暗黑模式适配 (检测到系统为深色或背景深色时生效) */
+        @media (prefers-color-scheme: dark) {
+            .badge.class {
+                /* 提高透明度或使用更亮的背景色，确保在深色底上可见 */
+                background: rgba(14, 165, 233, 0.25);
+                /* 字体颜色调亮，避免深蓝字配深蓝底 */
+                color: #7dd3fc; 
+            }
+            
+            /* 同时优化 Category 标签在暗黑模式下的显示 */
+            .badge.category {
+                background: rgba(236, 72, 153, 0.25);
+                color: #f9a8d4;
+            }
         }
 
         .badge.meta {
@@ -269,6 +289,10 @@
             .filter-panel {
                 position: relative;
                 top: 0;
+            }
+            /* 移动端恢复宽度 */
+            .post-feed {
+                max-width: 100%;
             }
         }
     </style>
