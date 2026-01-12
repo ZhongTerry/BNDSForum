@@ -62,26 +62,7 @@ BNDSForum/
 
 ## 快速开始
 
-```bash
-# 1. 创建并激活虚拟环境
-python3 -m venv .venv
-source .venv/bin/activate     # Windows: .venv\Scripts\activate
-
-# 2. 安装依赖
-pip install --upgrade pip
-pip install -r requirements.txt
-
-# 3. (可选) 配置环境变量
-export SECRET_KEY="change-me"
-export OJ_BASE_URL="https://onlinejudge.bnds.cn"
-
-# 4. 启动开发服务器
-python run.py                 # 监听 0.0.0.0:6001
-```
-
-首轮启动会自动在 `data/forum.sqlite3` 创建数据库，并初始化用户名为 `admin`、密码为 `admin123` 的管理员帐号。请立即登录后台修改密码。
-
-浏览器访问 `http://localhost:6001` 即可进入首页。
+TO BE DONE
 
 ## 配置与环境变量
 
@@ -155,3 +136,4 @@ python scripts/perf_test.py \
 - `--seed`：随机种子，便于复现压测场景。
 
 测试完成后会在终端输出各操作的吞吐（TPS）与时延（平均值、p95、max 等），可据此评估不同功能的性能表现。
+
