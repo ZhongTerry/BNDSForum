@@ -1,8 +1,9 @@
 import os
+import secrets
 from datetime import datetime
 from pathlib import Path
 
-from flask import Flask, current_app, flash, redirect, request, url_for
+from flask import Flask, abort, current_app, flash, redirect, request, session, url_for
 from flask_login import LoginManager, current_user
 
 from .datastore import DataStore
@@ -26,11 +27,29 @@ def create_app() -> Flask:
     from .blog import bp as blog_bp
     from .admin import bp as admin_bp
     from .messages import bp as messages_bp
+    from .tag import bp as tag_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(blog_bp)
     app.register_blueprint(admin_bp, url_prefix="/admin")
     app.register_blueprint(messages_bp)
+    app.register_blueprint(tag_bp)
+
+    def _get_csrf_token() -> str:
+        token = session.get("_csrf_token")
+        if not token:
+            token = secrets.token_hex(16)
+            session["_csrf_token"] = token
+        return token
+
+    @app.before_request
+    def csrf_protect():
+        if request.method not in {"POST", "PUT", "PATCH", "DELETE"}:
+            return None
+        token = session.get("_csrf_token")
+        submitted = request.form.get("_csrf_token") or request.headers.get("X-CSRFToken")
+        if not token or not submitted or submitted != token:
+            abort(400)
 
     @app.before_request
     def enforce_banned_guard():
@@ -53,6 +72,7 @@ def create_app() -> Flask:
             "is_admin": getattr(current_user, "is_admin", False),
             "current_year": datetime.now().year,
             "unread_message_count": unread_messages,
+            "csrf_token": _get_csrf_token,
         }
 
     return app

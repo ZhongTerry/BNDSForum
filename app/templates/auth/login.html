@@ -7,6 +7,7 @@
         <p class="form-tip">输入账号密码即可开始创作或留言。</p>
     </header>
     <form method="post" class="form-grid">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
         <div class="form-field">
             <label for="username">用户名</label>
             <input type="text" id="username" name="username" autocomplete="username" required>
@@ -17,7 +18,7 @@
         </div>
         <div class="form-actions">
             <button type="submit" class="button primary">登录</button>
-            <a class="button ghost" href="{{ url_for('auth.register') }}">注册新账号</a>
+            <span class="muted-text">注册已关闭，如需开通请联系管理员。</span>
         </div>
     </form>
 </section>

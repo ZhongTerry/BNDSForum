@@ -92,17 +92,20 @@
                         <td>
                             <div class="row-actions">
                                 <form id="{{ form_id }}" method="post" action="{{ url_for('admin.update_user') }}">
+                                    <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
                                     <input type="hidden" name="username" value="{{ user['username'] }}">
                                     <input type="hidden" name="return_to" value="{{ request.full_path.rstrip('?') }}">
                                     <button type="submit" class="button primary">保存</button>
                                 </form>
                                 {% if user['is_banned'] %}
                                     <form method="post" action="{{ url_for('admin.unban_user', username=user['username']) }}">
+                                        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
                                         <input type="hidden" name="return_to" value="{{ request.full_path.rstrip('?') }}">
                                         <button type="submit" class="button ghost">解封</button>
                                     </form>
                                 {% elif user['username'] != current_user.username %}
                                     <form method="post" action="{{ url_for('admin.ban_user', username=user['username']) }}">
+                                        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
                                         <input type="hidden" name="return_to" value="{{ request.full_path.rstrip('?') }}">
                                         <button type="submit" class="button danger ghost">封禁</button>
                                     </form>

@@ -22,9 +22,10 @@
     <div class="profile-meta">
         <div>
             <h2>真实姓名</h2>
-            <p class="muted-text">公开展示，可由本人或管理员修改。</p>
+            <p class="muted-text">公开展示，仅管理员可修改。</p>
             {% if can_edit_real_name %}
                 <form method="post" class="form-inline">
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
                     <label class="sr-only" for="real_name">真实姓名</label>
                     <input type="text" id="real_name" name="real_name" value="{{ profile.get('real_name', '') }}" required>
                     <button type="submit" class="button primary">保存</button>
@@ -71,6 +72,7 @@
                             </span>
                             {% if current_user.is_authenticated %}
                                 <form class="favorite-inline-form" method="post" action="{{ url_for('blog.favorite', post_id=post['id']) }}">
+                                    <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
                                     <input type="hidden" name="next" value="{{ request.path }}">
                                     <input type="hidden" name="action" value="{{ 'remove' if post['is_favorited'] else 'add' }}">
                                     <button type="submit" class="button secondary small">
@@ -122,6 +124,7 @@
                         <div class="post-shortcuts">
                             <span class="favorite-count">总收藏：{{ post['favorite_count'] }}</span>
                             <form class="favorite-inline-form" method="post" action="{{ url_for('blog.favorite', post_id=post['id']) }}">
+                                <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
                                 <input type="hidden" name="next" value="{{ request.path }}">
                                 <input type="hidden" name="action" value="remove">
                                 <button type="submit" class="button secondary small">取消收藏</button>

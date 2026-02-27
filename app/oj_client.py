@@ -84,9 +84,6 @@ class OnlineJudgeClient:
         if verify_ssl is None:
             env = os.getenv("OJ_VERIFY_SSL")
             if env is None:
-                # The production site currently uses a certificate chain that is
-                # not trusted in all environments, so default to False to keep
-                # the integration functional unless explicitly overridden.
                 verify_ssl = False
             else:
                 verify_ssl = env.lower() in {"1", "true", "yes", "on"}
@@ -145,6 +142,7 @@ class OnlineJudgeClient:
         if "用户名不存在" in body:
             raise OJAccountNotFound(f"账户 {username} 不存在")
         if "密码错误" in body:
+            print('Request Failed')
             raise OJInvalidCredentials("密码错误")
 
         raise OJServiceUnavailable("OJ 登录返回了未预期的响应")

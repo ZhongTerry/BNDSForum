@@ -66,15 +66,6 @@
 {% endblock %}
 {% block content %}
 <section class="card form-card">
-    <script>
-        window.addEventListener('beforeunload', function (e) {
-// 设置提示信息
-const confirmationMessage = '您确定要离开此页面吗？未保存的数据可能会丢失。';
-e.preventDefault(); // 阻止默认行为
-e.returnValue = confirmationMessage; // Gecko 和 IE 浏览器兼容
-return confirmationMessage; // Webkit 浏览器兼容
-});
-        </script>
     <header class="form-header">
         <h1>{{ '编辑文章' if post_id else '撰写文章' }}</h1>
         <p class="form-tip">正文支持 Markdown 语法，可直接粘贴图片链接或代码片段。</p>
@@ -85,6 +76,7 @@ return confirmationMessage; // Webkit 浏览器兼容
     {% endif %}
 
     <form method="post" class="form-grid">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
         <div class="form-field">
             <label for="title">标题</label>
             <input type="text" id="title" name="title" value="{{ title }}" placeholder="输入文章标题" required>
@@ -170,5 +162,23 @@ return confirmationMessage; // Webkit 浏览器兼容
             <a class="button ghost" href="{{ url_for('blog.index') }}">返回列表</a>
         </div>
     </form>
+    <script>
+        (function () {
+            let allowUnload = false;
+            window.addEventListener('beforeunload', function (e) {
+                if (allowUnload) return;
+                const confirmationMessage = '您确定要离开此页面吗？未保存的数据可能会丢失。';
+                e.preventDefault();
+                e.returnValue = confirmationMessage;
+                return confirmationMessage;
+            });
+            const form = document.querySelector('section.card form.form-grid');
+            if (form) {
+                form.addEventListener('submit', function () {
+                    allowUnload = true;
+                });
+            }
+        })();
+    </script>
 </section>
 {% endblock %}

@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import json
 import logging
+import os
+import secrets
 import sqlite3
 import time
 import uuid
@@ -613,11 +615,20 @@ class DataStore:
         with conn:
             count = conn.execute("SELECT COUNT(*) FROM users").fetchone()[0]
             if count == 0:
-                password_hash = generate_password_hash("admin123")
+                default_password = os.getenv("ADMIN_DEFAULT_PASSWORD")
+                generated = False
+                if not default_password:
+                    generated = True
+                    default_password = secrets.token_urlsafe(16)
+                password_hash = generate_password_hash(default_password)
                 conn.execute(
                     "INSERT INTO users (username, password_hash, role, constant_tags, real_name) VALUES (?, ?, ?, ?, ?)",
                     ("admin", password_hash, "admin", json.dumps([], ensure_ascii=False), ""),
                 )
+                if generated:
+                    logger.warning("初始化管理员账号已创建，用户名 admin，临时密码：%s", default_password)
+                else:
+                    logger.info("初始化管理员账号已创建，用户名 admin，使用环境变量指定密码")
 
     def _ensure_system_user(self, conn: sqlite3.Connection) -> None:
         with conn:

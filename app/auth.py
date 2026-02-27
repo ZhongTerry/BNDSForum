@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import threading
+from urllib.parse import urlparse
 
 from flask import Blueprint, current_app, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required, login_user, logout_user
@@ -51,8 +52,14 @@ def login():
                 except Exception:
                     current_app.logger.exception("发送登录系统通知失败：%s", username)
                 flash("登录成功", "success")
-                next_url = request.args.get("next") or url_for("blog.index")
-                return redirect(next_url)
+                next_url = request.args.get("next")
+                if next_url:
+                    parsed = urlparse(next_url)
+                    if parsed.scheme and parsed.scheme not in {"http", "https"}:
+                        next_url = None
+                    elif parsed.netloc and parsed.netloc != request.host:
+                        next_url = None
+                return redirect(next_url or url_for("blog.index"))
             else:
                 flash("登录失败，请联系管理员", "error")
     return render_template("auth/login.html")

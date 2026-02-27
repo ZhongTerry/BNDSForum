@@ -45,6 +45,7 @@
             <span class="favorite-count-label">收藏：{{ post['favorite_count'] }}</span>
             {% if current_user.is_authenticated %}
                 <form class="favorite-toggle-form" method="post" action="{{ url_for('blog.favorite', post_id=post['id']) }}">
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
                     <input type="hidden" name="next" value="{{ request.path }}">
                     <input type="hidden" name="action" value="{{ 'remove' if post['is_favorited'] else 'add' }}">
                     <button type="submit" class="button secondary">
@@ -65,6 +66,7 @@
 
 {% if can_edit %}
     <form class="post-actions" method="post" action="{{ url_for('blog.delete', post_id=post['id']) }}" onsubmit="return confirm('确定要删除这篇文章吗？');">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
         <a class="button" href="{{ url_for('blog.edit', post_id=post['id']) }}">编辑</a>
         <button type="submit" class="button danger">删除</button>
     </form>
@@ -95,6 +97,7 @@
                                   action="{{ url_for('blog.delete_comment', post_id=post['id'], comment_id=comment['id']) }}"
                                   class="comment-delete-form"
                                   onsubmit="return confirm('确定要删除这条评论吗？');">
+                                <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
                                 <button type="submit" class="button danger ghost small">删除</button>
                             </form>
                         {% endif %}
@@ -113,6 +116,7 @@
         <div class="comment-form">
             <h3>发表新评论</h3>
             <form method="post" class="comment-editor-form">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
                 <label for="content">评论内容</label>
                 <div class="markdown-editor compact" data-markdown-editor>
                     <div class="markdown-toolbar" role="toolbar" aria-label="Markdown 工具栏">

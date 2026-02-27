@@ -7,6 +7,7 @@
         <p class="form-tip">管理员可为同学指定角色。</p>
     </header>
     <form method="post" class="form-grid">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
         <div class="form-field">
             <label for="username">用户名</label>
             <input type="text" id="username" name="username" autocomplete="username" required>

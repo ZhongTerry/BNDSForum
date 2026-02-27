@@ -69,6 +69,7 @@
                         <form method="post"
                               action="{{ url_for('messages.update_preference', username=selected_username) }}"
                               class="thread-preference-form">
+                            <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
                             <label for="preference-select">提醒设置</label>
                             <select id="preference-select" name="preference">
                                 {% for option in preference_options %}
@@ -98,6 +99,7 @@
                 </div>
                 {% if allow_compose %}
                     <form method="post" action="{{ url_for('messages.send') }}" class="messages-compose">
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
                         <input type="hidden" name="recipient" value="{{ selected_username }}">
                         <label for="message-content">发送新消息</label>
                         <textarea id="message-content"

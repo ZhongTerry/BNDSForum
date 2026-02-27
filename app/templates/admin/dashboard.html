@@ -15,6 +15,7 @@
         <h2>类别标签</h2>
         <p class="form-tip">文章必须选择一个类别标签，适合按主题或栏目划分。</p>
         <form class="form-inline" method="post" action="{{ url_for('admin.add_category_tag') }}">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
             <label class="sr-only" for="category_tag_name">新增类别</label>
             <input type="text" id="category_tag_name" name="tag_name" placeholder="输入类别名称" required>
             <button type="submit" class="button primary">添加</button>
@@ -25,6 +26,7 @@
                     <li>
                         <span>{{ tag }}</span>
                         <form method="post" action="{{ url_for('admin.delete_category_tag') }}" onsubmit="return confirm('确定删除该类别标签吗？');">
+                            <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
                             <input type="hidden" name="tag_name" value="{{ tag }}">
                             <button type="submit" class="button danger ghost">删除</button>
                         </form>
@@ -40,6 +42,7 @@
         <h2>班级标签</h2>
         <p class="form-tip">支持本地维护与 OJ 小组同步的标签，可多选过滤。</p>
         <form class="form-inline" method="post" action="{{ url_for('admin.add_class_tag') }}">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
             <label class="sr-only" for="class_tag_name">新增班级标签</label>
             <input type="text" id="class_tag_name" name="tag_name" placeholder="输入班级或小组名称" required>
             <button type="submit" class="button primary">添加</button>
@@ -62,6 +65,7 @@
                         </span>
                         {% if source != 'oj' and source != 'builtin' %}
                             <form method="post" action="{{ url_for('admin.delete_class_tag') }}" onsubmit="return confirm('删除后班级标签将不可选，确定吗？');">
+                                <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
                                 <input type="hidden" name="tag_name" value="{{ name }}">
                                 <button type="submit" class="button danger ghost">删除</button>
                             </form>

@@ -40,6 +40,8 @@ POST_LINK_RE = re.compile(
     re.IGNORECASE | re.DOTALL,
 )
 
+CSRF_RE = re.compile(r'name="_csrf_token"\s+value="([^"]+)"')
+
 
 @dataclass
 class PostRecord:
@@ -295,9 +297,10 @@ class PerformanceTest:
         login_page = session.get(f"{self.base_url}/auth/login", timeout=self.timeout)
         if login_page.status_code != 200:
             return False
+        csrf_token = self._extract_csrf_token(login_page.text)
         resp = session.post(
             f"{self.base_url}/auth/login",
-            data={"username": self.username, "password": self.password},
+            data={"username": self.username, "password": self.password, "_csrf_token": csrf_token},
             allow_redirects=True,
             timeout=self.timeout,
         )
@@ -330,10 +333,25 @@ class PerformanceTest:
         content = "\n\n".join(f"段落 {_ + 1}: {para}" for _, para in enumerate(paragraphs))
         return title, content
 
+    @staticmethod
+    def _extract_csrf_token(html_source: str) -> Optional[str]:
+        match = CSRF_RE.search(html_source)
+        return match.group(1) if match else None
+
+    def _get_csrf_for_path(self, session: Session, path: str) -> Optional[str]:
+        url = path if path.startswith("http") else f"{self.base_url}{path}"
+        resp = session.get(url, timeout=self.timeout)
+        if resp.status_code != 200:
+            return None
+        return self._extract_csrf_token(resp.text)
+
     def _create_post_internal(self, session: Session, title: str, content: str) -> Optional[str]:
+        csrf_token = self._get_csrf_for_path(session, "/post/new")
+        if not csrf_token:
+            return None
         resp = session.post(
             f"{self.base_url}/post/new",
-            data={"title": title, "content": content},
+            data={"title": title, "content": content, "_csrf_token": csrf_token},
             allow_redirects=True,
             timeout=self.timeout,
         )
@@ -356,7 +374,7 @@ class PerformanceTest:
 
     def op_view_index(self, worker: Worker) -> bool:
         resp = worker.session.get(f"{self.base_url}/", timeout=self.timeout)
-        return resp.status_code == 200 and "精选校园创作" in resp.text
+        return resp.status_code == 200 and "班级标签" in resp.text
 
     def op_view_filters(self, worker: Worker) -> bool:
         resp = worker.session.get(
@@ -379,9 +397,10 @@ class PerformanceTest:
             login_page = session.get(f"{self.base_url}/auth/login", timeout=self.timeout)
             if login_page.status_code != 200:
                 return False
+            csrf_token = self._extract_csrf_token(login_page.text)
             resp = session.post(
                 f"{self.base_url}/auth/login",
-                data={"username": self.username, "password": self.password},
+                data={"username": self.username, "password": self.password, "_csrf_token": csrf_token},
                 timeout=self.timeout,
                 allow_redirects=True,
             )
@@ -392,17 +411,7 @@ class PerformanceTest:
     def op_create_post(self, worker: Worker) -> bool:
         worker.ensure_logged_in()
         title, content = self._generate_post_payload()
-        resp = worker.session.post(
-            f"{self.base_url}/post/new",
-            data={"title": title, "content": content},
-            timeout=self.timeout,
-            allow_redirects=True,
-        )
-        if resp.status_code != 200:
-            return False
-        post_id = self._extract_post_id_by_title(worker.session, resp.text, title)
-        if not post_id:
-            post_id = self._extract_post_id_by_title(worker.session, None, title)
+        post_id = self._create_post_internal(worker.session, title, content)
         if not post_id:
             return False
         self.shared_state.add_post(post_id, title, content)
@@ -414,9 +423,12 @@ class PerformanceTest:
         if not post:
             return False
         comment = f"性能测试评论 {uuid.uuid4().hex[:6]}"
+        csrf_token = self._get_csrf_for_path(worker.session, f"/post/{post.post_id}")
+        if not csrf_token:
+            return False
         resp = worker.session.post(
             f"{self.base_url}/post/{post.post_id}",
-            data={"content": comment},
+            data={"content": comment, "_csrf_token": csrf_token},
             timeout=self.timeout,
             allow_redirects=True,
         )
@@ -431,9 +443,12 @@ class PerformanceTest:
             return False
         new_title = f"{post.title} · 编辑 {uuid.uuid4().hex[:4]}"
         new_content = post.content or f"更新内容 {uuid.uuid4().hex}"
+        csrf_token = self._get_csrf_for_path(worker.session, f"/post/{post.post_id}/edit")
+        if not csrf_token:
+            return False
         resp = worker.session.post(
             f"{self.base_url}/post/{post.post_id}/edit",
-            data={"title": new_title, "content": new_content},
+            data={"title": new_title, "content": new_content, "_csrf_token": csrf_token},
             timeout=self.timeout,
             allow_redirects=True,
         )
