@@ -52,6 +52,15 @@ def create_app() -> Flask:
             abort(400)
 
     @app.before_request
+    def enforce_login_guard():
+        if current_user.is_authenticated:
+            return None
+        endpoint = request.endpoint or ""
+        if endpoint == "auth.login" or endpoint.startswith("static"):
+            return None
+        return redirect(url_for("auth.login", next=request.url))
+
+    @app.before_request
     def enforce_banned_guard():
         if not current_user.is_authenticated:
             return None
